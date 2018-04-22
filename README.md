@@ -1,6 +1,8 @@
 # Python Chemical-Crawler
 Crawler for Wikipedia Chemistry Information
 
+Python Version = 3
+
 This repository includes Python code that crawls any wanted chemical wikipedia page for the chemical and themodynamic properties.
 
 For example,
