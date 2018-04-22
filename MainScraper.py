@@ -85,7 +85,8 @@ def store(title, content):
 	cur.execute("INSERT INTO chemdata (title, content) VALUES (\"%s\",\"%s\")", (title, content))
 	cur.connection.commit()
    
-   
+'''
  finally:
 	cur.close()
 	conn.close()
+'''
