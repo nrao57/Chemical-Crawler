@@ -8,8 +8,13 @@ import random
 import pymysql
 import re
 
-conn = pymysql.connect(host='DESKTOP-MRDG44P', unix_socket='/tmp/mysql.sock', user='root',
-						passwd="unQ4it", db='mysql', charset='utf8')
+conn = pymysql.connect(
+host='mytestdbinstance.cfhyp6bq5apl.us-east-1.rds.amazonaws.com', 
+unix_socket='/tmp/mysql.sock', 
+user='mainuser',
+passwd="unQ4it12", 
+db='mysql', 
+charset='utf8')
 
 #DESKTOP-MRDG44P
 						
