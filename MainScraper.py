@@ -6,6 +6,8 @@ import re
 import pymysql
 import datetime
 
+#Connect to the mySQL server
+#all data will go into the chemcrawler database and the chemdata table
 conn = pymysql.connect(
 host='mytestdbinstance.cfhyp6bq5apl.us-east-1.rds.amazonaws.com', 
 unix_socket='/tmp/mysql.sock', 
@@ -13,11 +15,10 @@ user='mainuser',
 passwd="unQ4it12", 
 db='mysql', 
 charset='utf8')
-
+#start cursor  
 cur = conn.cursor()
-cur.execute('USE chemcrawler')#make chemcrawler database 
+cur.execute('USE chemcrawler')
 
-#make chemdata table
 
 
 def getSubTableNames(bsObj):
@@ -30,7 +31,7 @@ def getSubTableNames(bsObj):
     return subtablenames
 
 def getFieldNames(bsObj):
-    #find all field titles
+    #find all field titles from wiki page table
     fieldnames = []
     maintable = bsObj.find('table',{'class':'infobox bordered'}) #only finds first table
     for row in maintable.findAll('tr'):
@@ -41,20 +42,29 @@ def getFieldNames(bsObj):
     return fieldnames
 
 def getChemicalProperties(bsObj):
+    #Gets the field name and values from wiki page table 
     allcells=[]
-    for row in bsObj.find('table').tr.next_siblings:
-        c1=[]
+    for row in bsObj.find('table').tr.next_siblings: #loop through rows of wiki page table
+        c1=[] #this will be a list of the row's [field, value]
         for cell in row:
             if cell!='\n':
                 if cell.find('a') != None:
                     if 'title' in cell.find('a').attrs:
-                        c1.append(cell.find('a').attrs['title'])
+                        c1.append(forUnicode(cell.find('a').attrs['title']))
                 else:
-                    c1.append(cell.get_text())
+                    c1.append(forUnicode(cell.get_text())) #these are the values that are numbers 
         if len(c1)>1:
             allcells.append(c1)
     return allcells
 
+	
+def forUnicode(string):
+    #for unicode conversions
+    string2 = bytes(string, "UTF-8")
+    string3 = string2.decode("UTF-8")
+    return string3
+	
+	
 def ChemCrawler(pageUrl):
 
     #Create Dictionary to hold info
@@ -71,12 +81,15 @@ def ChemCrawler(pageUrl):
     except URLError as e:
         print(e)
         return
-
+	
+	#get the name of the chemical we are scraping
     chemicalproperties['name'] = bsObj.find('table',{'class':'infobox bordered'}).caption.get_text()
+    chemicalproperties['name'] = forUnicode(chemicalproperties['name'])
+    
+    properties = getChemicalProperties(bsObj) #returns a nested list [[field1, value1],...]
 
-    properties = getChemicalProperties(bsObj)
     for a in properties:
-        chemicalproperties[a[0]]=a[1]
+        chemicalproperties[a[0]]=a[1]#right side throws error
     
     return chemicalproperties  #feed into "store" function
 	
@@ -85,8 +98,6 @@ def store(title, content):
 	cur.execute("INSERT INTO chemdata (title, content) VALUES (\"%s\",\"%s\")", (title, content))
 	cur.connection.commit()
    
-'''
- finally:
-	cur.close()
-	conn.close()
-'''
+
+cur.close()
+conn.close()
