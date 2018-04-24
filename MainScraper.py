@@ -3,22 +3,6 @@ from urllib.parse import urlparse
 from urllib.error import URLError
 from bs4 import BeautifulSoup
 import re
-import pymysql
-import datetime
-
-#Connect to the mySQL server
-#all data will go into the chemcrawler database and the chemdata table
-conn = pymysql.connect(
-host='mytestdbinstance.cfhyp6bq5apl.us-east-1.rds.amazonaws.com', 
-unix_socket='/tmp/mysql.sock', 
-user='mainuser',
-passwd="unQ4it12", 
-db='mysql', 
-charset='utf8')
-#start cursor  
-cur = conn.cursor()
-cur.execute('USE chemcrawler')
-
 
 
 def getSubTableNames(bsObj):
@@ -87,17 +71,13 @@ def ChemCrawler(pageUrl):
     chemicalproperties['name'] = forUnicode(chemicalproperties['name'])
     
     properties = getChemicalProperties(bsObj) #returns a nested list [[field1, value1],...]
-
+	
     for a in properties:
         chemicalproperties[a[0]]=a[1]#right side throws error
-    
+		
     return chemicalproperties  #feed into "store" function
 	
 
-def store(title, content):
-	cur.execute("INSERT INTO chemdata (title, content) VALUES (\"%s\",\"%s\")", (title, content))
-	cur.connection.commit()
+
    
 
-cur.close()
-conn.close()
